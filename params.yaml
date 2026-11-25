@@ -1,0 +1,13 @@
+# Parámetros del pipeline. DVC vigila este archivo: si cambias un valor,
+# solo se re-ejecutan las etapas que dependen de él.
+
+prepare:
+  test_size: 0.2
+  random_state: 42
+
+train:
+  n_estimators: 100
+  random_state: 42
+
+evaluate:
+  min_accuracy: 0.8   # umbral mínimo para aprobar el modelo (lo usa pytest)

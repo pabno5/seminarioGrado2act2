@@ -1,0 +1,4 @@
+# Evita que archivos de caché de Python cambien el hash de las carpetas que DVC vigila
+__pycache__/
+*.pyc
+.pytest_cache/

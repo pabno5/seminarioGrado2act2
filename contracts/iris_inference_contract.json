@@ -1,0 +1,151 @@
+{
+  "contract": {
+    "name": "iris-inference-input",
+    "version": "1.0.0",
+    "status": "oficial",
+    "effective_date": "2026-11-23",
+    "owner": "Equipo del Proyecto Final – Seminario de Grado II",
+    "description": "Contrato de datos para solicitar una predicción al clasificador de flores Iris. Define qué debe enviar el cliente, qué devuelve el modelo y cómo se rechazan las entradas que no cumplen.",
+    "model": {
+      "name": "iris_classifier",
+      "algorithm": "RandomForestClassifier (scikit-learn)",
+      "mlflow_experiment": "Proyecto_Final_Grado",
+      "mlflow_artifact": "iris_model"
+    },
+    "endpoint": {
+      "method": "POST",
+      "path": "/predict",
+      "content_type": "application/json",
+      "granularity": "Una flor por solicitud"
+    },
+    "versioning": "Versionado semántico. Renombrar o eliminar un campo, o estrechar un rango, es un cambio incompatible y sube la versión mayor (2.0.0). Ampliar un rango o añadir campos opcionales sube la versión menor."
+  },
+
+  "input_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "IrisInput",
+    "description": "Medidas de una flor en centímetros.",
+    "type": "object",
+    "required": ["sepal_length", "sepal_width", "petal_length", "petal_width"],
+    "additionalProperties": false,
+    "properties": {
+      "sepal_length": {
+        "type": "number",
+        "minimum": 4.0,
+        "maximum": 8.0,
+        "description": "Longitud del sépalo en cm. Rango observado en el dataset: 4.3–7.9.",
+        "x-unit": "cm",
+        "x-model-column": "sepal length (cm)"
+      },
+      "sepal_width": {
+        "type": "number",
+        "minimum": 1.5,
+        "maximum": 5.0,
+        "description": "Ancho del sépalo en cm. Rango observado en el dataset: 2.0–4.4.",
+        "x-unit": "cm",
+        "x-model-column": "sepal width (cm)"
+      },
+      "petal_length": {
+        "type": "number",
+        "minimum": 0.5,
+        "maximum": 7.5,
+        "description": "Longitud del pétalo en cm. Rango observado en el dataset: 1.0–6.9.",
+        "x-unit": "cm",
+        "x-model-column": "petal length (cm)"
+      },
+      "petal_width": {
+        "type": "number",
+        "minimum": 0.1,
+        "maximum": 3.0,
+        "description": "Ancho del pétalo en cm. Rango observado en el dataset: 0.1–2.5.",
+        "x-unit": "cm",
+        "x-model-column": "petal width (cm)"
+      }
+    }
+  },
+
+  "validation_rules": {
+    "order": ["estructura", "nulo", "tipo", "rango"],
+    "estructura": "El cuerpo debe ser un objeto JSON con los 4 campos requeridos y ninguno adicional.",
+    "nulo": "Ningún campo admite null. NaN e Infinity no son JSON válido y también se rechazan.",
+    "tipo": "Cada valor debe ser un número JSON, sin comillas. Se rechazan textos (incluido \"5.1\"), booleanos, listas y objetos.",
+    "rango": "Cada valor debe estar entre su minimum y su maximum, con los dos límites incluidos.",
+    "chaining": "Si un campo es nulo no se evalúa su tipo, y si el tipo es incorrecto no se evalúa su rango. Cada campo reporta como máximo un error.",
+    "on_violation": {
+      "http_status": 422,
+      "action": "Se rechaza la solicitud completa sin generar predicción y se devuelve la lista de errores, uno por campo, con su causa."
+    }
+  },
+
+  "output_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "IrisPrediction",
+    "type": "object",
+    "required": ["prediction", "class_id"],
+    "additionalProperties": false,
+    "properties": {
+      "prediction": {
+        "type": "string",
+        "enum": ["setosa", "versicolor", "virginica"],
+        "description": "Especie predicha."
+      },
+      "class_id": {
+        "type": "integer",
+        "enum": [0, 1, 2],
+        "description": "Código de la clase: 0=setosa, 1=versicolor, 2=virginica."
+      }
+    }
+  },
+
+  "examples": {
+    "valid": {
+      "description": "Flor con pétalos pequeños: cumple todas las reglas y el modelo la clasifica como setosa.",
+      "input": {
+        "sepal_length": 5.1,
+        "sepal_width": 3.5,
+        "petal_length": 1.4,
+        "petal_width": 0.2
+      },
+      "expected_output": {
+        "prediction": "setosa",
+        "class_id": 0
+      }
+    },
+    "invalid": {
+      "description": "Solicitud que viola las cuatro reglas a la vez. Debe rechazarse con HTTP 422 y sin predicción.",
+      "input": {
+        "sepal_length": 51.0,
+        "sepal_width": null,
+        "petal_length": "1.4",
+        "color": "morado"
+      },
+      "expected_errors": [
+        {
+          "field": "petal_width",
+          "check": "estructura",
+          "reason": "Falta un campo requerido."
+        },
+        {
+          "field": "color",
+          "check": "estructura",
+          "reason": "El campo no está definido en el contrato."
+        },
+        {
+          "field": "sepal_width",
+          "check": "nulo",
+          "reason": "El campo no admite null."
+        },
+        {
+          "field": "petal_length",
+          "check": "tipo",
+          "reason": "Se envió el texto \"1.4\"; debe enviarse como número, sin comillas."
+        },
+        {
+          "field": "sepal_length",
+          "check": "rango",
+          "reason": "51.0 supera el máximo de 8.0 cm; probablemente se midió en milímetros."
+        }
+      ]
+    }
+  }
+}

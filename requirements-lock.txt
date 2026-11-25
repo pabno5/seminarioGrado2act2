@@ -1,0 +1,11 @@
+# Versiones exactas con las que se probó el pipeline (Python 3.11 y 3.13).
+# Para reproducir el entorno de referencia:  python -m pip install -r requirements-lock.txt
+# requirements.txt instala, en cambio, las versiones compatibles más recientes.
+mlflow==3.18.0
+scikit-learn==1.9.1
+pandas==3.1.1
+joblib==1.6.0
+pyyaml==6.0.4
+dvc==3.67.1
+pytest==9.2.0
+great-expectations==1.25.0

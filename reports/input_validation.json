@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "files": [
+    {
+      "source": "train.csv",
+      "success": true,
+      "rows_checked": 120,
+      "invalid_rows": 0,
+      "issues_by_check": {
+        "estructura": 0,
+        "nulo": 0,
+        "tipo": 0,
+        "rango": 0
+      },
+      "issues": []
+    },
+    {
+      "source": "test.csv",
+      "success": true,
+      "rows_checked": 30,
+      "invalid_rows": 0,
+      "issues_by_check": {
+        "estructura": 0,
+        "nulo": 0,
+        "tipo": 0,
+        "rango": 0
+      },
+      "issues": []
+    }
+  ]
+}

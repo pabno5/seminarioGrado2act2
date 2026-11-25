@@ -1,0 +1,15 @@
+# Entornos
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# MLflow (historial local de experimentos)
+mlruns/
+mlartifacts/
+mlflow.db
+
+# data/processed y models/ los versiona DVC: él mismo añade sus .gitignore

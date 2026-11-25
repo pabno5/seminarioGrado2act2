@@ -1,0 +1,8 @@
+mlflow>=3.0
+scikit-learn
+pandas
+joblib
+pyyaml
+dvc
+pytest
+great-expectations>=1.0,<2.0

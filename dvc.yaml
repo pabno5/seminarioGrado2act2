@@ -1,0 +1,64 @@
+# Pipeline: prepare → validate_input → validate → train → test
+# DVC solo re-ejecuta una etapa si cambian sus deps, params o si faltan sus outs.
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+      - src/prepare.py
+    params:
+      - prepare
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  validate_input:            # tipos, nulos y rangos con Python puro (sin librerías)
+    cmd: python src/input_validation.py
+    deps:
+      - src/input_validation.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+    outs:
+      - reports/input_validation.json:
+          cache: false
+
+  validate:                  # suite de Great Expectations (usa el mismo esquema)
+    cmd: python src/validate_data.py
+    deps:
+      - src/validate_data.py
+      - src/input_validation.py
+      - reports/input_validation.json   # solo corre si la validación básica pasó
+      - data/processed/train.csv
+      - data/processed/test.csv
+    outs:
+      - reports/data_validation.json:
+          cache: false
+
+  train:
+    cmd: python src/train.py
+    deps:
+      - src/train.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - reports/data_validation.json   # obliga a validar los datos antes de entrenar
+    params:
+      - train
+    outs:
+      - models/model.pkl
+    metrics:
+      - reports/metrics.json:
+          cache: false
+
+  test:
+    cmd: python -m pytest tests/ -v -p no:cacheprovider --junitxml=reports/pytest.xml
+    deps:
+      - tests/
+      - contracts/
+      - src/input_validation.py
+      - models/model.pkl
+      - data/processed/train.csv
+      - data/processed/test.csv
+    params:
+      - evaluate
+    outs:
+      - reports/pytest.xml:
+          cache: false

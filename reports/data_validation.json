@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "datasets": {
+    "train": {
+      "success": true,
+      "rows": 120,
+      "evaluated": 12,
+      "failed": []
+    },
+    "test": {
+      "success": true,
+      "rows": 30,
+      "evaluated": 12,
+      "failed": []
+    }
+  }
+}
