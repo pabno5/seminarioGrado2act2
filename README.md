@@ -84,7 +84,7 @@ instaladas las dependencias, el pipeline funciona sin conexión.
 ### 3.1 Obtener el código
 
 ```bash
-git clone <URL-del-repositorio> mlops-iris   # o descomprime el .zip del proyecto
+git clone (https://github.com/pabno5/seminarioGrado2act2.git) mlops-iris   # o descomprime el .zip del proyecto
 cd mlops-iris
 ```
 
